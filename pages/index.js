@@ -1,26 +1,49 @@
-import { Button } from 'react-bootstrap';
-import { signOut } from '../utils/auth';
+import React, { useEffect, useState } from 'react';
+import Link from 'next/link';
+import { checkEmployee, signOut } from '../utils/auth';
 import { useAuth } from '../utils/context/authContext';
+import RegisterForm from '../components/RegisterForm';
 
 function Home() {
   const { user } = useAuth();
-  return (
-    <div
-      className="text-center d-flex flex-column justify-content-center align-content-center"
-      style={{
-        height: '90vh',
-        padding: '30px',
-        maxWidth: '400px',
-        margin: '0 auto',
-      }}
-    >
-      <h1>Hello {user.fbUser.displayName}! </h1>
-      <p>Your Bio: {user.bio}</p>
-      <p>Click the button below to logout!</p>
-      <Button variant="danger" type="button" size="lg" className="copy-btn" onClick={signOut}>
+  const [myUser, setMyUser] = useState();
+
+  const onUpdate = () => {
+    checkEmployee(user.uid).then((data) => setMyUser(data[0]));
+  };
+
+  useEffect(() => {
+    checkEmployee(user.uid).then((data) => setMyUser(data[0]));
+  }, [user.uid]);
+
+  const renderEmployeeContent = () => (
+    <div>
+      <h1>Welcome {user.fbUser.displayName}!</h1>
+      <Link passHref href="/OrderPage">
+        <button type="button">View Orders</button>
+      </Link>
+      <Link passHref href="/CreateOrderForm">
+        <button type="button">Create an Order</button>
+      </Link>
+      <Link passHref href="/OrderPage">
+        <button type="button">View Revenue</button>
+      </Link>
+      <button type="button" onClick={signOut}>
         Sign Out
-      </Button>
+      </button>
     </div>
+  );
+
+  const renderNonEmployeeContent = () => (
+    <p>You must be logged in as an employee.</p>
+  );
+
+  return (
+    <>
+      {myUser === undefined && <RegisterForm user={user} onUpdate={onUpdate} />}
+      {myUser?.isEmployee && renderEmployeeContent()}
+      {myUser?.isEmployee === false && renderNonEmployeeContent()}
+    </>
   );
 }
 

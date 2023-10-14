@@ -2,25 +2,28 @@ import firebase from 'firebase/app';
 import 'firebase/auth';
 import { clientCredentials } from './client';
 
-const checkUser = (uid) => new Promise((resolve, reject) => {
-  fetch(`${clientCredentials.databaseURL}/checkuser`, {
-    method: 'POST',
-    body: JSON.stringify({
-      uid,
-    }),
+const checkEmployee = (uid) => new Promise((resolve, reject) => {
+  fetch(`${clientCredentials.databaseURL}/checkemployee/${uid}`, {
+    method: 'GET',
     headers: {
       'Content-Type': 'application/json',
       Accept: 'application/json',
     },
   })
-    .then((resp) => resolve(resp.json()))
+    .then(async (res) => {
+      let data;
+      if (res.ok) {
+        data = await res.json();
+        resolve(data);
+      }
+    })
     .catch(reject);
 });
 
-const registerUser = (userInfo) => new Promise((resolve, reject) => {
-  fetch(`${clientCredentials.databaseURL}/register`, {
+const createEmployee = (employeeInfo) => new Promise((resolve, reject) => {
+  fetch(`${clientCredentials.databaseURL}/api/employee`, {
     method: 'POST',
-    body: JSON.stringify(userInfo),
+    body: JSON.stringify(employeeInfo),
     headers: {
       'Content-Type': 'application/json',
       Accept: 'application/json',
@@ -42,6 +45,6 @@ const signOut = () => {
 export {
   signIn, //
   signOut,
-  checkUser,
-  registerUser,
+  checkEmployee,
+  createEmployee,
 };

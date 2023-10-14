@@ -1,8 +1,8 @@
 {
-  "name": "next-firebase-starter",
+  "name": "hhpw-sb-fe",
   "private": true,
   "version": "1.0.0",
-  "author": "Trinity Christiana",
+  "author": "Sean Bryant",
   "scripts": {
     "dev": "next dev",
     "build": "next build",

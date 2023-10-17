@@ -19,7 +19,7 @@ function Home() {
   const renderEmployeeContent = () => (
     <div>
       <h1>Welcome {user.fbUser.displayName}!</h1>
-      <Link passHref href="/OrderPage">
+      <Link passHref href="/ViewOrdersPage">
         <button type="button">View Orders</button>
       </Link>
       <Link passHref href="/CreateOrderPage">

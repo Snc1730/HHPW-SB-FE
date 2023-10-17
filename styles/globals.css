@@ -20,3 +20,16 @@ a {
 body {
   background-color: #88effd;
 }
+
+.order-card {
+  border: 2px solid #333; /* Increase the border thickness and change the color */
+  padding: 20px;
+  margin-bottom: 20px;
+  background-color: #444; /* Set a dark gray background color */
+  color: white; /* Set the text color to white */
+}
+
+.card-content {
+  display: flex;
+  flex-direction: column;
+}

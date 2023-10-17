@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import Link from 'next/link';
-import { checkEmployee, signOut } from '../utils/auth';
+import { checkEmployee } from '../utils/auth';
 import { useAuth } from '../utils/context/authContext';
 import RegisterForm from '../components/RegisterForm';
 
@@ -28,9 +28,6 @@ function Home() {
       <Link passHref href="/OrderPage">
         <button type="button">View Revenue</button>
       </Link>
-      <button type="button" onClick={signOut}>
-        Sign Out
-      </button>
     </div>
   );
 

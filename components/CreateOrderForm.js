@@ -3,7 +3,7 @@ import Button from 'react-bootstrap/Button';
 import Form from 'react-bootstrap/Form';
 import { useRouter } from 'next/router';
 import { associateMenuItemWithOrder, createOrder } from '../api/OrderEndpoints';
-import getAllMenuItems from '../api/MenuItemEndpoints';
+import { getAllMenuItems, getMenuItemById } from '../api/MenuItemEndpoints';
 import { useAuth } from '../utils/context/authContext';
 import { checkEmployee } from '../utils/auth';
 
@@ -47,17 +47,19 @@ const CreateOrderForm = () => {
     try {
       const employeeId = myUser?.id;
 
-      console.log('Creating order...');
-      console.log('Order data:', {
-        orderName,
-        tip,
-        orderType,
-        paymentType,
-        customerName,
-        customerEmail,
-        customerPhone,
-        employeeId: parseInt(employeeId, 10),
-      });
+      const currentDate = new Date();
+      const formattedDate = currentDate.toISOString();
+
+      // Fetch menu item details to calculate OrderPrice
+      const menuItemsDetails = await Promise.all(
+        Object.keys(menuItemQuantities).map(async (menuItemId) => {
+          const menuItem = await getMenuItemById(menuItemId);
+          return { id: menuItem.id, price: menuItem.price, quantity: menuItemQuantities[menuItemId] };
+        }),
+      );
+
+      // Calculate OrderPrice based on selected menu items and their quantities
+      const orderPrice = menuItemsDetails.reduce((totalPrice, menuItem) => totalPrice + menuItem.price * menuItem.quantity, 0);
 
       const orderResponse = await createOrder({
         orderName,
@@ -74,16 +76,12 @@ const CreateOrderForm = () => {
             parseInt(quantity, 10),
           ]),
         ),
+        DatePlaced: formattedDate,
+        OrderPrice: orderPrice,
       });
-
-      console.log('Order response:', JSON.stringify(orderResponse));
-      console.log('Order response id:', orderResponse.id);
 
       if (orderResponse && orderResponse.id) {
         const orderId = orderResponse.id;
-        console.log('Order ID:', orderId);
-        console.log('MenuItemQuantities:', menuItemQuantities);
-        console.log('Reached associationPromises block');
 
         const associationPromises = Object.keys(menuItemQuantities).map(async (menuItemId) => {
           const quantity = menuItemQuantities[menuItemId];

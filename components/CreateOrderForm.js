@@ -68,6 +68,12 @@ const CreateOrderForm = () => {
         customerEmail,
         customerPhone,
         employeeId: parseInt(employeeId, 10),
+        menuItemQuantities: Object.fromEntries(
+          Object.entries(menuItemQuantities).map(([menuItemId, quantity]) => [
+            parseInt(menuItemId, 10),
+            parseInt(quantity, 10),
+          ]),
+        ),
       });
 
       console.log('Order response:', JSON.stringify(orderResponse));

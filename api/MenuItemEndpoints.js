@@ -18,4 +18,24 @@ const getAllMenuItems = async () => {
   }
 };
 
-export default getAllMenuItems;
+const getMenuItemById = async (id) => {
+  try {
+    const response = await fetch(`https://localhost:7027/api/menuitem/${id}`, {
+      method: 'GET',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+    });
+
+    if (!response.ok) {
+      throw new Error('Error fetching menu item');
+    }
+
+    const data = await response.json();
+    return data;
+  } catch (error) {
+    throw new Error(`Error fetching menu item: ${error.message}`);
+  }
+};
+
+export { getAllMenuItems, getMenuItemById };

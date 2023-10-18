@@ -18,7 +18,25 @@ const getAllOrders = async () => {
   }
 };
 
-export default getAllOrders;
+const getOrderById = async (id) => {
+  try {
+    const response = await fetch(`https://localhost:7027/api/order/${id}`, {
+      method: 'GET',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+    });
+
+    if (!response.ok) {
+      throw new Error('Error fetching order');
+    }
+
+    const data = await response.json();
+    return data;
+  } catch (error) {
+    throw new Error(`Error fetching order: ${error.message}`);
+  }
+};
 
 const createOrder = async (orderData) => {
   try {
@@ -66,7 +84,30 @@ const associateMenuItemWithOrder = async (orderId, menuItemId) => {
   }
 };
 
+const getOrderMenuItems = async (orderId) => {
+  try {
+    const response = await fetch(`https://localhost:7027/api/orders/${orderId}/orderitems`, {
+      method: 'GET',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+    });
+
+    if (!response.ok) {
+      throw new Error('Error fetching order menu items');
+    }
+
+    const orderItems = await response.json();
+    return orderItems;
+  } catch (error) {
+    throw new Error(`Error fetching order menu items: ${error.message}`);
+  }
+};
+
 export {
   createOrder,
   associateMenuItemWithOrder,
+  getAllOrders,
+  getOrderById,
+  getOrderMenuItems,
 };

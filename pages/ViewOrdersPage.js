@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import OpenOrderCard from '../components/OpenOrderCard';
-import getAllOrders from '../api/OrderEndpoints';
+import { getAllOrders } from '../api/OrderEndpoints';
 
 const ViewOrdersPage = () => {
   const [openOrders, setOpenOrders] = useState([]);

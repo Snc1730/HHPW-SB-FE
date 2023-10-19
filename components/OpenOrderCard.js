@@ -10,6 +10,9 @@ const OpenOrderCard = ({ order }) => (
     <Link href={`/order-details/${order.id}`} passHref>
       <button type="button">View Details</button>
     </Link>
+    <Link href={`/edit-order/${order.id}`} passHref>
+      <button type="button">Edit Order</button>
+    </Link>
   </div>
 );
 

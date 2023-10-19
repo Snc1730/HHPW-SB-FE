@@ -2,16 +2,17 @@ import React, { useState, useEffect } from 'react';
 import Button from 'react-bootstrap/Button';
 import Form from 'react-bootstrap/Form';
 import { useRouter } from 'next/router';
-import { associateMenuItemWithOrder, createOrder } from '../api/OrderEndpoints';
+import PropTypes from 'prop-types';
+import { associateMenuItemWithOrder, createOrder, updateOrder } from '../api/OrderEndpoints';
 import { getAllMenuItems, getMenuItemById } from '../api/MenuItemEndpoints';
 import { useAuth } from '../utils/context/authContext';
 import { checkEmployee } from '../utils/auth';
 
-const CreateOrderForm = () => {
+const CreateOrderForm = ({ obj }) => {
+  console.log('Received obj:', obj);
   const { user } = useAuth();
   const [myUser, setMyUser] = useState();
   const [orderName, setOrderName] = useState('');
-  const [tip, setTip] = useState('');
   const [orderType, setOrderType] = useState('');
   const [paymentType, setPaymentType] = useState('');
   const [customerName, setCustomerName] = useState('');
@@ -20,6 +21,25 @@ const CreateOrderForm = () => {
   const [menuItems, setMenuItems] = useState([]);
   const [menuItemQuantities, setMenuItemQuantities] = useState({});
   const router = useRouter();
+
+  // Add a useEffect to populate form fields when editing an order
+  useEffect(() => {
+    console.log('Populating form fields with obj:', obj);
+    if (obj) {
+      // If obj is provided, it means you're editing an order
+      setOrderName(obj.orderName || ''); // Populate with order name, use '' as a fallback
+      setOrderType(obj.orderType || ''); // Populate with order type, use '' as a fallback
+      setPaymentType(obj.paymentType || ''); // Populate with payment type, use '' as a fallback
+      setCustomerName(obj.customerName || ''); // Populate with customer name, use '' as a fallback
+      setCustomerEmail(obj.customerEmail || ''); // Populate with customer email, use '' as a fallback
+      setCustomerPhone(obj.customerPhone || ''); // Populate with customer phone, use '' as a fallback
+
+      // You might need to populate menuItemQuantities as well if it's available in obj
+      if (obj.menuItemQuantities) {
+        setMenuItemQuantities(obj.menuItemQuantities);
+      }
+    }
+  }, [obj]);
 
   const onUpdate = () => {
     checkEmployee(user.uid).then((data) => setMyUser(data[0]));
@@ -43,63 +63,70 @@ const CreateOrderForm = () => {
     fetchMenuItems();
   }, []);
 
-  const handleCreateOrder = async () => {
+  const handleFormSubmit = async () => {
     try {
+      console.log('Form submitted. Editing:', obj ? 'Yes' : 'No');
       const employeeId = myUser?.id;
-
       const currentDate = new Date();
       const formattedDate = currentDate.toISOString();
-
-      // Fetch menu item details to calculate OrderPrice
       const menuItemsDetails = await Promise.all(
         Object.keys(menuItemQuantities).map(async (menuItemId) => {
           const menuItem = await getMenuItemById(menuItemId);
           return { id: menuItem.id, price: menuItem.price, quantity: menuItemQuantities[menuItemId] };
         }),
       );
-
-      // Calculate OrderPrice based on selected menu items and their quantities
       const orderPrice = menuItemsDetails.reduce((totalPrice, menuItem) => totalPrice + menuItem.price * menuItem.quantity, 0);
 
-      const orderResponse = await createOrder({
-        orderName,
-        tip,
-        orderType,
-        paymentType,
-        customerName,
-        customerEmail,
-        customerPhone,
-        employeeId: parseInt(employeeId, 10),
-        menuItemQuantities: Object.fromEntries(
-          Object.entries(menuItemQuantities).map(([menuItemId, quantity]) => [
-            parseInt(menuItemId, 10),
-            parseInt(quantity, 10),
-          ]),
-        ),
-        DatePlaced: formattedDate,
-        OrderPrice: orderPrice,
-      });
-
-      if (orderResponse && orderResponse.id) {
-        const orderId = orderResponse.id;
-
-        const associationPromises = Object.keys(menuItemQuantities).map(async (menuItemId) => {
-          const quantity = menuItemQuantities[menuItemId];
-          if (quantity > 0) {
-            console.log(`Associating menu item ${menuItemId} with quantity ${quantity} to order ${orderId}`);
-            await associateMenuItemWithOrder(orderId, menuItemId, quantity);
-          }
+      if (obj) {
+        // If obj is provided, it's an edit operation
+        await updateOrder(obj.id, {
+          orderName,
+          orderType,
+          paymentType,
+          customerName,
+          customerEmail,
+          customerPhone,
+          employeeId: parseInt(employeeId, 10),
+          menuItemQuantities: Object.fromEntries(
+            Object.entries(menuItemQuantities).map(([menuItemId, quantity]) => [parseInt(menuItemId, 10), parseInt(quantity, 10)]),
+          ),
+          DatePlaced: formattedDate,
+          OrderPrice: orderPrice,
         });
-
-        await Promise.all(associationPromises);
-
-        console.log('Order placed successfully!');
-        router.push('/');
       } else {
-        console.error('Error creating order: Unexpected or incomplete response received', orderResponse);
+        // It's a new order
+        const orderResponse = await createOrder({
+          orderName,
+          orderType,
+          paymentType,
+          customerName,
+          customerEmail,
+          customerPhone,
+          employeeId: parseInt(employeeId, 10),
+          menuItemQuantities: Object.fromEntries(
+            Object.entries(menuItemQuantities).map(([menuItemId, quantity]) => [parseInt(menuItemId, 10), parseInt(quantity, 10)]),
+          ),
+          DatePlaced: formattedDate,
+          OrderPrice: orderPrice,
+        });
+        if (orderResponse && orderResponse.id) {
+          const orderId = orderResponse.id;
+          const associationPromises = Object.keys(menuItemQuantities).map(async (menuItemId) => {
+            const quantity = menuItemQuantities[menuItemId];
+            if (quantity > 0) {
+              console.log(`Associating menu item ${menuItemId} with quantity ${quantity} to order ${orderId}`);
+              await associateMenuItemWithOrder(orderId, menuItemId, quantity);
+            }
+          });
+          await Promise.all(associationPromises);
+          console.log('Order placed successfully!');
+          router.push('/');
+        } else {
+          console.error('Error creating order: Unexpected or incomplete response received', orderResponse);
+        }
       }
     } catch (error) {
-      console.error('Error creating order:', error);
+      console.error('Error creating/updating order:', error);
     }
   };
 
@@ -119,16 +146,6 @@ const CreateOrderForm = () => {
           placeholder="Enter order name"
           value={orderName}
           onChange={(e) => setOrderName(e.target.value)}
-        />
-      </Form.Group>
-
-      <Form.Group controlId="formTip">
-        <Form.Label>Tip</Form.Label>
-        <Form.Control
-          type="text"
-          placeholder="Enter tip amount"
-          value={tip}
-          onChange={(e) => setTip(e.target.value)}
         />
       </Form.Group>
 
@@ -205,11 +222,29 @@ const CreateOrderForm = () => {
         ))}
       </Form.Group>
 
-      <Button variant="primary" onClick={handleCreateOrder}>
+      <Button variant="primary" onClick={handleFormSubmit}>
         Create Order
       </Button>
     </Form>
   );
+};
+
+CreateOrderForm.propTypes = {
+  obj: PropTypes.shape({
+    id: PropTypes.number,
+    orderName: PropTypes.string,
+    orderType: PropTypes.string,
+    paymentType: PropTypes.string,
+    customerName: PropTypes.string,
+    customerEmail: PropTypes.string,
+    customerPhone: PropTypes.string,
+    // Add other properties and their PropTypes based on your project's requirements
+    menuItemQuantities: PropTypes.objectOf(PropTypes.number), // Assuming this is an object, adjust as needed
+  }),
+};
+
+CreateOrderForm.defaultProps = {
+  obj: null,
 };
 
 export default CreateOrderForm;

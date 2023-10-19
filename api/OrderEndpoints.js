@@ -104,10 +104,32 @@ const getOrderMenuItems = async (orderId) => {
   }
 };
 
+const updateOrder = async (orderId, updatedOrderData) => {
+  try {
+    const response = await fetch(`https://localhost:7027/api/order/${orderId}`, {
+      method: 'PUT',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify(updatedOrderData),
+    });
+
+    if (!response.ok) {
+      throw new Error('Error updating order');
+    }
+
+    // Since updating an order may not return data, you can simply return a success message.
+    return 'Order updated successfully';
+  } catch (error) {
+    throw new Error(`Error updating order: ${error.message}`);
+  }
+};
+
 export {
   createOrder,
   associateMenuItemWithOrder,
   getAllOrders,
   getOrderById,
   getOrderMenuItems,
+  updateOrder,
 };

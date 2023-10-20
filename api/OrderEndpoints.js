@@ -125,6 +125,25 @@ const updateOrder = async (orderId, updatedOrderData) => {
   }
 };
 
+const deleteOrder = async (orderId) => {
+  try {
+    const response = await fetch(`https://localhost:7027/api/order/${orderId}`, {
+      method: 'DELETE',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+    });
+
+    if (!response.ok) {
+      throw new Error('Error deleting order');
+    }
+
+    return 'Order deleted successfully';
+  } catch (error) {
+    throw new Error(`Error deleting order: ${error.message}`);
+  }
+};
+
 export {
   createOrder,
   associateMenuItemWithOrder,
@@ -132,4 +151,5 @@ export {
   getOrderById,
   getOrderMenuItems,
   updateOrder,
+  deleteOrder,
 };

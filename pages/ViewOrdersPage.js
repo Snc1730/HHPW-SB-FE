@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import OpenOrderCard from '../components/OpenOrderCard';
-import { getAllOrders } from '../api/OrderEndpoints';
+import { deleteOrder, getAllOrders } from '../api/OrderEndpoints';
 
 const ViewOrdersPage = () => {
   const [openOrders, setOpenOrders] = useState([]);
@@ -26,7 +26,7 @@ const ViewOrdersPage = () => {
     <div>
       <h2>Open Orders</h2>
       {openOrders.map((order) => (
-        <OpenOrderCard key={order.id} order={order} />
+        <OpenOrderCard key={order.id} order={order} onDelete={deleteOrder} />
       ))}
     </div>
   );

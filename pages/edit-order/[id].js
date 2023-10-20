@@ -4,7 +4,7 @@ import { getOrderById } from '../../api/OrderEndpoints';
 import CreateOrderForm from '../../components/CreateOrderForm';
 
 const EditOrderPage = () => {
-  const [orderData, setOrderData] = useState(null); // Set to null initially
+  const [orderData, setOrderData] = useState(null);
   const router = useRouter();
   const { id } = router.query;
 
@@ -12,8 +12,7 @@ const EditOrderPage = () => {
     const fetchOrderData = async () => {
       if (id) {
         try {
-          // Fetch order data by ID using your API endpoint
-          const order = await getOrderById(id); // Implement this API call
+          const order = await getOrderById(id);
           console.log('Fetched order data:', order);
           setOrderData(order);
         } catch (error) {

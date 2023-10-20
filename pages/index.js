@@ -25,7 +25,7 @@ function Home() {
       <Link passHref href="/CreateOrderPage">
         <button type="button">Create an Order</button>
       </Link>
-      <Link passHref href="/OrderPage">
+      <Link passHref href="/revenuePage">
         <button type="button">View Revenue</button>
       </Link>
     </div>

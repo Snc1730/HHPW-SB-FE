@@ -22,19 +22,15 @@ const CreateOrderForm = ({ obj }) => {
   const [menuItemQuantities, setMenuItemQuantities] = useState({});
   const router = useRouter();
 
-  // Add a useEffect to populate form fields when editing an order
   useEffect(() => {
     console.log('Populating form fields with obj:', obj);
     if (obj) {
-      // If obj is provided, it means you're editing an order
-      setOrderName(obj.orderName || ''); // Populate with order name, use '' as a fallback
-      setOrderType(obj.orderType || ''); // Populate with order type, use '' as a fallback
-      setPaymentType(obj.paymentType || ''); // Populate with payment type, use '' as a fallback
-      setCustomerName(obj.customerName || ''); // Populate with customer name, use '' as a fallback
-      setCustomerEmail(obj.customerEmail || ''); // Populate with customer email, use '' as a fallback
-      setCustomerPhone(obj.customerPhone || ''); // Populate with customer phone, use '' as a fallback
-
-      // You might need to populate menuItemQuantities as well if it's available in obj
+      setOrderName(obj.orderName || '');
+      setOrderType(obj.orderType || '');
+      setPaymentType(obj.paymentType || '');
+      setCustomerName(obj.customerName || '');
+      setCustomerEmail(obj.customerEmail || '');
+      setCustomerPhone(obj.customerPhone || '');
       if (obj.menuItemQuantities) {
         setMenuItemQuantities(obj.menuItemQuantities);
       }
@@ -46,7 +42,6 @@ const CreateOrderForm = ({ obj }) => {
   };
 
   useEffect(() => {
-    // Call onUpdate when user.uid changes
     onUpdate();
   }, [user.uid]);
 
@@ -78,7 +73,6 @@ const CreateOrderForm = ({ obj }) => {
       const orderPrice = menuItemsDetails.reduce((totalPrice, menuItem) => totalPrice + menuItem.price * menuItem.quantity, 0);
 
       if (obj) {
-        // If obj is provided, it's an edit operation
         await updateOrder(obj.id, {
           orderName,
           orderType,
@@ -238,8 +232,7 @@ CreateOrderForm.propTypes = {
     customerName: PropTypes.string,
     customerEmail: PropTypes.string,
     customerPhone: PropTypes.string,
-    // Add other properties and their PropTypes based on your project's requirements
-    menuItemQuantities: PropTypes.objectOf(PropTypes.number), // Assuming this is an object, adjust as needed
+    menuItemQuantities: PropTypes.objectOf(PropTypes.number),
   }),
 };
 

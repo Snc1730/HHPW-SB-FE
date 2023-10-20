@@ -22,11 +22,11 @@ body {
 }
 
 .order-card {
-  border: 2px solid #333; /* Increase the border thickness and change the color */
+  border: 2px solid #333; 
   padding: 20px;
   margin-bottom: 20px;
-  background-color: #444; /* Set a dark gray background color */
-  color: white; /* Set the text color to white */
+  background-color: #444; 
+  color: white; 
 }
 
 .card-content {

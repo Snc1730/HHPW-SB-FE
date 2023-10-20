@@ -17,14 +17,12 @@ const OrderDetailsPage = () => {
           return;
         }
 
-        // Fetch order details
         const orderData = await getOrderById(id);
-        console.log('Order Data:', orderData); // Log order data
+        console.log('Order Data:', orderData);
         setOrderDetails(orderData);
 
-        // Fetch associated menu items
-        const menuItemsData = await getOrderMenuItems(id); // Implement this API call
-        console.log('Menu Items Data:', menuItemsData); // Log menu items data
+        const menuItemsData = await getOrderMenuItems(id);
+        console.log('Menu Items Data:', menuItemsData);
         setMenuItems(menuItemsData);
       } catch (error) {
         console.error('Error fetching order details:', error);

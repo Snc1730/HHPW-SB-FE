@@ -11,7 +11,7 @@ const CloseOrderPage = () => {
   useEffect(() => {
     const fetchOrderData = async () => {
       try {
-        const order = await getOrderById(id); // Fetch order data
+        const order = await getOrderById(id);
         setOrderData(order);
       } catch (error) {
         // Handle errors

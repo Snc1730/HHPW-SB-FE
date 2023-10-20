@@ -118,7 +118,6 @@ const updateOrder = async (orderId, updatedOrderData) => {
       throw new Error('Error updating order');
     }
 
-    // Since updating an order may not return data, you can simply return a success message.
     return 'Order updated successfully';
   } catch (error) {
     throw new Error(`Error updating order: ${error.message}`);

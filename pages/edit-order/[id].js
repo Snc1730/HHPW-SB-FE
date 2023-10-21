@@ -14,6 +14,12 @@ const EditOrderPage = () => {
         try {
           const order = await getOrderById(id);
           console.log('Fetched order data:', order);
+
+          // Log the menuItemQuantities data
+          if (order && order.menuItemQuantities) {
+            console.log('MenuItem Quantities:', order.menuItemQuantities);
+          }
+
           setOrderData(order);
         } catch (error) {
           console.error('Error fetching order data:', error);

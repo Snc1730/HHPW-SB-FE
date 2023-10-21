@@ -3,7 +3,10 @@ import Button from 'react-bootstrap/Button';
 import Form from 'react-bootstrap/Form';
 import { useRouter } from 'next/router';
 import PropTypes from 'prop-types';
-import { associateMenuItemWithOrder, createOrder, updateOrder } from '../api/OrderEndpoints';
+import Image from 'next/image';
+import {
+  associateMenuItemWithOrder, createOrder, disassociateMenuItemFromOrder, updateOrder,
+} from '../api/OrderEndpoints';
 import { getAllMenuItems, getMenuItemById } from '../api/MenuItemEndpoints';
 import { useAuth } from '../utils/context/authContext';
 import { checkEmployee } from '../utils/auth';
@@ -80,6 +83,7 @@ const CreateOrderForm = ({ obj }) => {
           customerName,
           customerEmail,
           customerPhone,
+          orderStatus: obj.orderStatus,
           employeeId: parseInt(employeeId, 10),
           menuItemQuantities: Object.fromEntries(
             Object.entries(menuItemQuantities).map(([menuItemId, quantity]) => [parseInt(menuItemId, 10), parseInt(quantity, 10)]),
@@ -87,6 +91,7 @@ const CreateOrderForm = ({ obj }) => {
           DatePlaced: formattedDate,
           OrderPrice: orderPrice,
         });
+        router.push('/');
       } else {
         // It's a new order
         const orderResponse = await createOrder({
@@ -124,11 +129,30 @@ const CreateOrderForm = ({ obj }) => {
     }
   };
 
-  const handleMenuItemQuantityChange = (menuItemId, quantity) => {
-    setMenuItemQuantities((prevQuantities) => ({
-      ...prevQuantities,
-      [menuItemId]: quantity,
-    }));
+  const handleMenuItemQuantityChange = async (menuItemId, quantity) => {
+    // Check if the order is being edited
+    if (obj) {
+      const currentQuantity = menuItemQuantities[menuItemId] || 0;
+
+      setMenuItemQuantities((prevQuantities) => ({
+        ...prevQuantities,
+        [menuItemId]: quantity,
+      }));
+
+      try {
+        if (quantity === 1 && currentQuantity === 0) {
+          // Association: Quantity increased from 0 to 1
+          console.log(`Associating menu item ${menuItemId} with quantity ${quantity} to order ${obj.id}`);
+          await associateMenuItemWithOrder(obj.id, menuItemId, quantity);
+        } else if (quantity === 0 && currentQuantity === 1) {
+          // Disassociation: Quantity decreased from 1 to 0
+          console.log(`Disassociating menu item ${menuItemId} from order ${obj.id}`);
+          await disassociateMenuItemFromOrder(obj.id, menuItemId);
+        }
+      } catch (error) {
+        console.error('Error changing association:', error);
+      }
+    }
   };
 
   return (
@@ -206,6 +230,15 @@ const CreateOrderForm = ({ obj }) => {
         {menuItems.map((menuItem) => (
           <Form.Group key={menuItem.id} controlId={`menuItem-${menuItem.id}`}>
             <Form.Label>{menuItem.name}</Form.Label>
+            <p>Price: {menuItem.price}</p>
+            <div style={{ width: '100px', height: '100px' }}>
+              <Image
+                src={menuItem.imageUrl}
+                alt={menuItem.name}
+                width={100}
+                height={100}
+              />
+            </div>
             <Form.Control
               type="number"
               min="0"
@@ -217,7 +250,7 @@ const CreateOrderForm = ({ obj }) => {
       </Form.Group>
 
       <Button variant="primary" onClick={handleFormSubmit}>
-        Create Order
+        Submit Order
       </Button>
     </Form>
   );
@@ -232,6 +265,7 @@ CreateOrderForm.propTypes = {
     customerName: PropTypes.string,
     customerEmail: PropTypes.string,
     customerPhone: PropTypes.string,
+    orderStatus: PropTypes.string,
     menuItemQuantities: PropTypes.objectOf(PropTypes.number),
   }),
 };

@@ -84,6 +84,26 @@ const associateMenuItemWithOrder = async (orderId, menuItemId) => {
   }
 };
 
+const disassociateMenuItemFromOrder = async (orderId, menuItemId) => {
+  try {
+    const response = await fetch(`https://localhost:7027/api/MenuItemsOrder?orderId=${orderId}&itemId=${menuItemId}`, {
+      method: 'DELETE',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+    });
+
+    if (!response.ok) {
+      throw new Error('Error disassociating menu item from order');
+    }
+
+    const data = await response.json();
+    return data;
+  } catch (error) {
+    throw new Error(`Error disassociating menu item from order: ${error.message}`);
+  }
+};
+
 const getOrderMenuItems = async (orderId) => {
   try {
     const response = await fetch(`https://localhost:7027/api/orders/${orderId}/orderitems`, {
@@ -146,6 +166,7 @@ const deleteOrder = async (orderId) => {
 export {
   createOrder,
   associateMenuItemWithOrder,
+  disassociateMenuItemFromOrder,
   getAllOrders,
   getOrderById,
   getOrderMenuItems,
